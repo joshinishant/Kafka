@@ -7,12 +7,12 @@ import java.util.Properties;
 
 public class Producer {
 
-    public static final String topicName="topic-1";
+    public static final String topicName="topic-2";
 
     public static void main(String args[]){
 
         Properties properties=new Properties();
-        properties.setProperty("bootstrap.servers", "localhost:9092");
+        properties.setProperty("bootstrap.servers", "localhost:9092,localhost:9093,localhost:9094");
         properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 

@@ -1,5 +1,6 @@
 package com.techminds.kafka;
 
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -12,13 +13,13 @@ import java.util.UUID;
 
 public class TopicConsumer {
 
-    public static final String topicName1="topic-1";
+    public static final String topicName1="topic-2";
 
     public static void main(String args[]){
 
         Properties properties=new Properties();
-        properties.put("bootstrap.servers", "localhost:9092");
-        properties.put("group.id", UUID.randomUUID().toString());
+        properties.put("bootstrap.servers", "localhost:9092,localhost:9093,localhost:9094");
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, UUID.randomUUID().toString());
         //properties.put("client.id", "test");
         //properties.put("enable.auto.commit", "false");
         properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
@@ -31,22 +32,21 @@ public class TopicConsumer {
         topicPartitions.add(new TopicPartition(topicName1,0));
 
         kafkaConsumer.assign(topicPartitions);
+        try {
+            while (true){
 
-        /*while (true)*/{
-            try {
-                 ConsumerRecords<String,String> consumerRecords=kafkaConsumer.poll(100);
+                ConsumerRecords<String,String> consumerRecords=kafkaConsumer.poll(100);
 
-                 for (ConsumerRecord<String,String> consumerRecord:consumerRecords){
-                     System.out.print("Topic - "+consumerRecord.topic());
-                     System.out.printf("offset = %d, key = %s, value = %s", consumerRecord.offset(), consumerRecord.key(), consumerRecord.value());
-                 }
+                for (ConsumerRecord<String,String> consumerRecord:consumerRecords){
+                    System.out.print("Topic - "+consumerRecord.topic()+" ");
+                    System.out.printf("offset = %d, key = %s, value = %s\n", consumerRecord.offset(), consumerRecord.key(), consumerRecord.value());
+                }
                 kafkaConsumer.commitSync();
-            }catch (Exception e){
-                e.printStackTrace();
-            }finally {
-                kafkaConsumer.close();
             }
-
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            kafkaConsumer.close();
         }
 
 

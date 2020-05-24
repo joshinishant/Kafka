@@ -11,18 +11,19 @@ import java.util.UUID;
 
 public class Consumer {
 
-    public static final String topicName1="topic-1";
+    public static final String topicName1="topic-2";
 
     public static void main(String args[]){
 
         Properties properties=new Properties();
-        properties.put("bootstrap.servers", "localhost:9092");
+        properties.put("bootstrap.servers", "localhost:9092,localhost:9093,localhost:9094");
         properties.put("group.id", UUID.randomUUID().toString());
         //properties.put("client.id", "test");
-        //properties.put("enable.auto.commit", "false");
+        properties.put("enable.auto.commit", "true");
         properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         properties.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-
+        properties.put("session.timeout.ms", "30000");
+        properties.put("auto.commit.interval.ms", "1000");
 
         KafkaConsumer<String,String> kafkaConsumer=new KafkaConsumer<String, String>(properties);
 
@@ -31,21 +32,22 @@ public class Consumer {
 
         kafkaConsumer.subscribe(topics);
 
-        /*while (true)*/{
-            try {
-                 ConsumerRecords<String,String> consumerRecords=kafkaConsumer.poll(100);
+        try {
+            while (true){
 
-                 for (ConsumerRecord<String,String> consumerRecord:consumerRecords){
-                     System.out.print("Topic - "+consumerRecord.topic());
-                     System.out.printf("offset = %d, key = %s, value = %s", consumerRecord.offset(), consumerRecord.key(), consumerRecord.value());
-                 }
+                ConsumerRecords<String,String> consumerRecords=kafkaConsumer.poll(100);
+
+                for (ConsumerRecord<String,String> consumerRecord:consumerRecords){
+                    System.out.print("Topic - "+consumerRecord.topic()+" ");
+                    System.out.printf("offset = %d, key = %s, value = %s", consumerRecord.offset(), consumerRecord.key(), consumerRecord.value());
+                }
                 kafkaConsumer.commitSync();
-            }catch (Exception e){
-                e.printStackTrace();
-            }finally {
-                kafkaConsumer.close();
             }
 
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            kafkaConsumer.close();
         }
 
 
